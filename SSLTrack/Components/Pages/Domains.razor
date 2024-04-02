@@ -1,0 +1,116 @@
+﻿@page "/domains"
+@inject DomainService DomainService;
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+
+<MudText Typo="Typo.h3" GutterBottom="true">Tracked Domains</MudText>
+<MudText Typo="Typo.h5" GutterBottom="true">Certificates currently being monitored</MudText>
+
+<MudCard>
+    <MudCardContent>
+        <MudButton OnClick="@((e) => OpenDialog(maxWidth))" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowDownward" Color="Color.Info" Style="width: 200px; height: 60px;">
+            Track a Domain
+        </MudButton>
+
+        @if (domains == null)
+        {
+            <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+        }
+        else
+        {
+            <MudTable Items="domains" Hover="true" SortLabel="Sort By" Elevation="0">
+                <HeaderContent>
+                    <MudTh>Days Left</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.DomainName)">Domain</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.CertCN)">CN</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.Issuer)">Issuer</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.ExpiryDate)">Expire Date</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Domain, object>(x=>x.LastChecked)">Last Checked</MudTableSortLabel></MudTh>
+                    <MudTh>Delete</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Days">
+                        <MudChip Color="@ChipColor(CalcExpiration(context.ExpiryDate))">
+                            <div style="text-align:center; min-width:50px; max-width: 50px"> @CalcExpiration(context.ExpiryDate)</div>
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Domain">@context.DomainName</MudTd>
+                    <MudTd DataLabel="CertCN">@context.CertCN</MudTd>
+                    <MudTd DataLabel="Issuer">@context.Issuer</MudTd>
+                    <MudTd DataLabel="ExpiryDate">@context.ExpiryDate</MudTd>
+                    <MudTd DataLabel="LastChecked">@context.LastChecked</MudTd>
+                    <MudTd DataLabel="Delete">
+                        <MudIcon onclick="@(() => DeleteDomain(context.DomainName))" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" Style="cursor: pointer;" />
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[]{10, 50, 100}" />
+                </PagerContent>
+            </MudTable>
+        }
+    </MudCardContent>
+</MudCard>
+@code {
+    private IEnumerable<Domain>? domains;
+
+    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+
+    private async Task OpenDialog(DialogOptions options)
+    {
+        var dialogresult = DialogService.Show<NewDomain>("Track a Domain", options);
+        var result = await dialogresult.Result;
+        var domain = (Domain)result.Data;
+        if (!result.Canceled && domain is not null)
+        {
+            domains = await DomainService.GetDomains();
+            AddSnackbar($"Domain {domain.DomainName} added!", Severity.Success);
+            return;
+        }
+        if (!result.Canceled && domain is null)
+        {
+            AddSnackbar($"Failed to add domain, check data and try again!", Severity.Error);
+            return;
+        }
+    }
+
+    void AddSnackbar(string message, Severity severity)
+    {
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        Snackbar.Add(message, severity);
+    }
+
+    protected async Task DeleteDomain(string domainName)
+    {
+        Console.WriteLine(domainName);
+        await DomainService.DeleteDomain(domainName);
+        domains = await DomainService.GetDomains();
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        domains = await DomainService.GetDomains();
+    }
+
+    protected double CalcExpiration(DateTime expireDate)
+    {
+        var days = expireDate - DateTime.Now;
+        return Math.Floor(days.TotalDays);
+    }
+
+    protected Color ChipColor(double days)
+    {
+        if (days < 1)
+        {
+            return Color.Error;
+        }
+
+        if (days < 30)
+        {
+            return Color.Warning;
+        }
+        return Color.Success;
+    }
+}

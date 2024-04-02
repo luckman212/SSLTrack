@@ -1,0 +1,34 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemingProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" @rendermode="InteractiveServer" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<PageTitle>SSLTrack - SSL Certificates Monitoring</PageTitle>
+
+<MudLayout>
+    <MudAppBar Elevation="1">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIcon Icon="@Icons.Material.Outlined.Lock" />
+        <MudText Typo="Typo.h5" Class="ml-3">SSLTrack</MudText>
+        <MudSpacer />
+        <MudSwitch @bind-Value="@_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" Label="Light/Dark" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent Class="mt-16 pa-4">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+    private MudTheme _theme = new();
+    private bool _isDarkMode;
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
