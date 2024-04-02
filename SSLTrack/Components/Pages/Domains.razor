@@ -83,7 +83,6 @@
 
     protected async Task DeleteDomain(string domainName)
     {
-        Console.WriteLine(domainName);
         await DomainService.DeleteDomain(domainName);
         domains = await DomainService.GetDomains();
         StateHasChanged();
