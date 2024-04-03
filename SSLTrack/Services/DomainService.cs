@@ -119,7 +119,7 @@ public class DomainService
             if (domain.ExpiryDate < DateTime.Now.AddDays(_configurations.DaysToExpiration) && _configurations.AlertsEnabled)
             {
                 _mailService.Subject = $"Certificate for domain {domain.DomainName.ToUpper()} is close to expiration date!";
-                _mailService.Body = $"Certificate for domain {domain.DomainName.ToUpper()} will expire on {domain.ExpiryDate}";
+                _mailService.Body = $"Certificate for domain {domain.DomainName.ToUpper()} on port {domain.Port} will expire on {domain.ExpiryDate}";
                 _mailService.SendMail();
             }
         }

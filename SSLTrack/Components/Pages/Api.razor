@@ -2,6 +2,19 @@
 
 <h3>Api</h3>
 
-@code {
+<MudCard Class="mt-4">
+    <MudCardContent>
+        <MudText>
+            Api Version: @version
+        </MudText>
+    </MudCardContent>
+</MudCard>
 
+@code {
+    private String? version;
+
+    protected override void OnInitialized()
+    {
+        version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+    }
 }

@@ -52,7 +52,7 @@
     {
         var domainExist = await DomainService.GetDomain(model.Domain);
         _processing = false;
-        if (domainExist.Any())
+        if (Validators.DomainExists(domainExist, model.Domain, int.Parse(model.Port)))
         {
             _exists = true;
             return;

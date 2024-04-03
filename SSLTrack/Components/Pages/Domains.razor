@@ -23,7 +23,8 @@
                 <HeaderContent>
                     <MudTh>Days Left</MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.DomainName)">Domain</MudTableSortLabel></MudTh>
-                    <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.CertCN)">CN</MudTableSortLabel></MudTh>
+                    <MudTh>Port</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.CertCN)">Certificate CN</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.Issuer)">Issuer</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.ExpiryDate)">Expire Date</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Domain, object>(x=>x.LastChecked)">Last Checked</MudTableSortLabel></MudTh>
@@ -36,6 +37,7 @@
                         </MudChip>
                     </MudTd>
                     <MudTd DataLabel="Domain">@context.DomainName</MudTd>
+                    <MudTd DataLabel="Port">@context.Port</MudTd>
                     <MudTd DataLabel="CertCN">@context.CertCN</MudTd>
                     <MudTd DataLabel="Issuer">@context.Issuer</MudTd>
                     <MudTd DataLabel="ExpiryDate">@context.ExpiryDate</MudTd>
