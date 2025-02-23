@@ -17,7 +17,9 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>();
 builder.Services.AddScoped<IDomainRepository, DomainRepository>();
 builder.Services.AddHostedService<HangfireService>();
 builder.Services.AddScoped<DomainService>();
-builder.Services.AddSingleton<MailService>();
+builder.Services.AddTransient(provider => new SmtpClient());
+
+builder.Services.AddScoped<MailService>();
 builder.Services.AddSingleton<CertificateService>();
 var app = builder.Build();
 

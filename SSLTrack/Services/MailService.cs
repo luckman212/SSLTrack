@@ -3,13 +3,20 @@
 public class MailService : MailProperties
 {
     private readonly ILogger<MailService> _logger;
-    private readonly RetryPolicy _retryPolicy = Policy.Handle<Exception>()
-                .WaitAndRetry(3, retryCount => TimeSpan.FromSeconds(Math.Pow(2, retryCount)));
+    private readonly RetryPolicy _retryPolicy;
+    private readonly SmtpClient _smtpClient;
 
-    public MailService(ILogger<MailService> logger, IConfiguration configuration)
+    public MailService(ILogger<MailService> logger, IConfiguration configuration, SmtpClient smtpClient)
     {
         _logger = logger;
-        var mailProperties = configuration.GetSection("MailProperties").Get<MailProperties>()!;
+        _smtpClient = smtpClient;
+
+        _retryPolicy = Policy.Handle<Exception>()
+            .WaitAndRetry(3, retryCount => TimeSpan.FromSeconds(Math.Pow(2, retryCount)));
+
+        var mailProperties = configuration.GetSection("MailProperties").Get<MailProperties>()
+                             ?? throw new ArgumentNullException(nameof(configuration), "MailProperties configuration is missing.");
+
 
         MailFrom = mailProperties.MailFrom;
         MailTo = mailProperties.MailTo;
@@ -30,30 +37,39 @@ public class MailService : MailProperties
     {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(Name, MailFrom));
-        message.To.Add(new MailboxAddress(MailTo, MailTo));
-        message.Subject = Subject;
-        message.Body = new TextPart("html")
+        foreach (var recipient in MailTo.Split(';', StringSplitOptions.RemoveEmptyEntries))
         {
-            Text = Body
-        };
+            message.To.Add(new MailboxAddress(recipient, recipient));
+        }
+        if (!string.IsNullOrEmpty(Bcc))
+        {
+            foreach (var bccRecipient in Bcc.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                message.Bcc.Add(new MailboxAddress(bccRecipient, bccRecipient));
+            }
+        }
+        message.Subject = Subject;
+        message.Body = IsBodyHtml
+            ? new TextPart("html") { Text = Body }
+            : new TextPart("plain") { Text = Body };
 
-        var smtpClient = new SmtpClient();
         try
         {
-            smtpClient.Connect(SmtpHost, Port, EnableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
-            if (Username != "")
+            _smtpClient.Connect(SmtpHost, Port, EnableSsl ? SecureSocketOptions.Auto : SecureSocketOptions.None);
+            if (!string.IsNullOrWhiteSpace(Username))
             {
-                smtpClient.Authenticate(Username, Password);
+                _smtpClient.Authenticate(Username, Password);
             }
-            _retryPolicy.Execute(() => smtpClient.Send(message));
+            _retryPolicy.Execute(() => _smtpClient.Send(message));
         }
         catch (Exception ex)
         {
-            _logger.LogError("{ex}", ex.Message);
+            _logger.LogError(ex, "Failed to send email.");
+            throw;
         }
         finally
         {
-            smtpClient.Disconnect(true);
+            _smtpClient.Disconnect(true);
         }
     }
 }
