@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 <MudThemingProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" @rendermode="InteractiveServer" />
 <MudPopoverProvider />
@@ -12,7 +13,7 @@
         <MudIcon Icon="@Icons.Material.Outlined.Lock" />
         <MudText Typo="Typo.h5" Class="ml-3">SSLTrack</MudText>
         <MudSpacer />
-        <MudSwitch @bind-Value="@_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" Label="Light/Dark" />
+        <MudSwitch T="bool" Label="Light/Dark" Class="ma-4" Color="Color.Primary" Value="@_isDarkMode" ValueChanged="OnThemeChanged" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
@@ -26,6 +27,25 @@
     private bool _drawerOpen = true;
     private MudTheme _theme = new();
     private bool _isDarkMode;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (string.IsNullOrEmpty(await localStorage.GetItemAsync<string>("isDarkMode")))
+            {
+                await localStorage.SetItemAsync("isDarkMode", _isDarkMode);
+            }
+            _isDarkMode = bool.Parse(await localStorage.GetItemAsync<string>("isDarkMode"));
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnThemeChanged(bool value)
+    {
+        _isDarkMode = value;
+        await localStorage.SetItemAsync("isDarkMode", value);
+    }
 
     private void DrawerToggle()
     {

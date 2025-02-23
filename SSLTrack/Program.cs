@@ -21,6 +21,7 @@ builder.Services.AddTransient(provider => new SmtpClient());
 
 builder.Services.AddScoped<MailService>();
 builder.Services.AddSingleton<CertificateService>();
+builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
