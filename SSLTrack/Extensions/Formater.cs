@@ -10,7 +10,7 @@ public static class Formater
             Match match = Regex.Match(issuer, pattern);
             if (match.Success)
             {
-                return match.Groups[1].Value;
+                return match.Groups[1].Value.Replace("\"", "");
             }
             return issuer.Replace("CN=", "");
         }
