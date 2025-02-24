@@ -9,7 +9,7 @@
 
 <MudCard>
     <MudCardContent>
-        <MudButton OnClick="@((e) => OpenDialog(maxWidth))" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowDownward" Color="Color.Info" Style="width: 200px; height: 60px;">
+        <MudButton OnClick="@((e) => OpenDialog(diagOptions))" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.ArrowDownward" Color="Color.Info" Style="width: 200px; height: 60px;">
             Track a Domain
         </MudButton>
 
@@ -43,7 +43,7 @@
                     <MudTd DataLabel="ExpiryDate">@context.ExpiryDate</MudTd>
                     <MudTd DataLabel="LastChecked">@context.LastChecked</MudTd>
                     <MudTd DataLabel="Delete">
-                        <MudIcon onclick="@(() => DeleteDomain(context.DomainName))" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" Style="cursor: pointer;" />
+                        <MudIcon onclick="@(() => ConfirmDelete(diagOptions, context.DomainName))" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" Style="cursor: pointer;" />
                     </MudTd>
                 </RowTemplate>
                 <PagerContent>
@@ -56,7 +56,7 @@
 @code {
     private IEnumerable<Domain>? domains;
 
-    DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
+    DialogOptions diagOptions = new DialogOptions() { MaxWidth = MaxWidth.Small, FullWidth = true, CloseOnEscapeKey = true };
 
     private async Task OpenDialog(DialogOptions options)
     {
@@ -81,6 +81,23 @@
         Snackbar.Clear();
         Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
         Snackbar.Add(message, severity);
+    }
+
+    private async Task ConfirmDelete(DialogOptions options, string domainName)
+    {
+        var parameters = new DialogParameters<DelDomain>
+        {
+            { x => x.Domain, domainName }
+        };
+
+        var dialogresult = DialogService.Show<DelDomain>("Delete Domain", parameters, options);
+        var result = await dialogresult.Result;
+
+        if (!result.Canceled)
+        {
+            await DeleteDomain(domainName);
+            AddSnackbar($"Domain {domainName} deleted!", Severity.Success);
+        }
     }
 
     protected async Task DeleteDomain(string domainName)
