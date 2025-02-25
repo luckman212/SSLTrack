@@ -1,7 +1,8 @@
 ﻿@inherits LayoutComponentBase
-@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject ThemeService ThemeService
+@inject IJSRuntime JSRuntime
 
-<MudThemingProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" @rendermode="InteractiveServer" />
+<MudThemingProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -9,7 +10,7 @@
 
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@DrawerToggle" />
         <MudIcon Icon="@Icons.Material.Outlined.Lock" />
         <MudText Typo="Typo.h5" Class="ml-3">SSLTrack</MudText>
         <MudSpacer />
@@ -28,23 +29,23 @@
     private MudTheme _theme = new();
     private bool _isDarkMode;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            if (string.IsNullOrEmpty(await localStorage.GetItemAsync<string>("isDarkMode")))
-            {
-                await localStorage.SetItemAsync("isDarkMode", _isDarkMode);
-            }
-            _isDarkMode = bool.Parse(await localStorage.GetItemAsync<string>("isDarkMode"));
-            StateHasChanged();
-        }
+        var httpContext = new HttpContextAccessor().HttpContext;
+        _isDarkMode = ThemeService.IsDarkMode(httpContext);
     }
 
     private async Task OnThemeChanged(bool value)
     {
         _isDarkMode = value;
-        await localStorage.SetItemAsync("isDarkMode", value);
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("setDarkModeCookie", value);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in JS interop: {ex.Message}");
+        }
     }
 
     private void DrawerToggle()
