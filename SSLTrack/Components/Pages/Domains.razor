@@ -28,6 +28,7 @@
                     <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.Issuer)">Issuer</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Domain, object>(x=>x.ExpiryDate)">Expire Date</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<Domain, object>(x=>x.LastChecked)">Last Checked</MudTableSortLabel></MudTh>
+                    <MudTh>Silenced</MudTh>
                     <MudTh>Delete</MudTh>
                 </HeaderContent>
                 <RowTemplate>
@@ -42,6 +43,15 @@
                     <MudTd DataLabel="Issuer">@context.Issuer</MudTd>
                     <MudTd DataLabel="ExpiryDate">@context.ExpiryDate</MudTd>
                     <MudTd DataLabel="LastChecked">@context.LastChecked</MudTd>
+                    <MudTd DataLabel="Silenced">
+                        <MudToggleIconButton Toggled="context.Silenced"
+                                             Icon="@Icons.Material.Filled.AlarmOn"
+                                             Color="@Color.Success"
+                                             ToggledIcon="@Icons.Material.Filled.AlarmOff"
+                                             ToggledColor="@Color.Error"
+                                             @onclick="() => ToggleSilence(context)" />
+
+                    </MudTd>
                     <MudTd DataLabel="Delete">
                         <MudIcon onclick="@(() => ConfirmDelete(diagOptions, context.DomainName))" Icon="@Icons.Material.Filled.DeleteForever" Color="Color.Error" Style="cursor: pointer;" />
                     </MudTd>
@@ -105,6 +115,24 @@
         await DomainService.DeleteDomain(domainName);
         domains = await DomainService.GetDomains();
         StateHasChanged();
+    }
+
+    private async Task ToggleSilence(Domain context)
+    {
+        bool newStatus = !context.Silenced;
+
+        context.Silenced = newStatus;
+        bool success = await DomainService.UpdateDomain(context.DomainName, context);
+
+        if (success)
+        {
+            domains = await DomainService.GetDomains();
+            StateHasChanged();
+        }
+        else
+        {
+            context.Silenced = !newStatus;
+        }
     }
 
     protected override async Task OnInitializedAsync()

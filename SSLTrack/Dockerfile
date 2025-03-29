@@ -18,6 +18,7 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-COPY ["assets/data.db", "./"]
+RUN mkdir data
+COPY ["assets/data.db", "./data"]
 
 ENTRYPOINT ["./SSLTrack"]

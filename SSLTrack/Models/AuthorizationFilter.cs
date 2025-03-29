@@ -1,4 +1,6 @@
-﻿public class AuthorizationFilter : IDashboardAuthorizationFilter
+﻿namespace SSLTrack.Models;
+
+public class AuthorizationFilter : IDashboardAuthorizationFilter
 {
     public bool Authorize(DashboardContext context)
     {

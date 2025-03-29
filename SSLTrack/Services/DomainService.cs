@@ -105,6 +105,7 @@ public class DomainService
                     LastChecked = DateTime.Now,
                     UserId = domain.UserId,
                     Agent = domain.Agent,
+                    Silenced = domain.Silenced != false && Expiration.GetExpirationStatus(certificate.NotAfter, _configurations.DaysToExpiration)
                 };
                 await _repository.Update(updated);
             }
@@ -117,6 +118,9 @@ public class DomainService
         foreach (var domain in domains)
         {
             if (!_configurations.AlertsEnabled)
+                continue;
+
+            if (domain.Silenced)
                 continue;
 
             var now = DateTime.Now;
