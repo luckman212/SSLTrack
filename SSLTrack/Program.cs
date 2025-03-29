@@ -1,4 +1,6 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddHangfire(options =>
@@ -42,5 +44,8 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "api/swagger";
 });
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-app.UseHangfireDashboard("/hangfire");
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = [new AuthorizationFilter()]
+});
 app.Run();

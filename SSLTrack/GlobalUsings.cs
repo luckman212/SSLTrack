@@ -1,5 +1,6 @@
 ﻿global using Blazored.LocalStorage;
 global using Hangfire;
+global using Hangfire.Dashboard;
 global using MailKit.Net.Smtp;
 global using MailKit.Security;
 global using Microsoft.AspNetCore.DataProtection;
