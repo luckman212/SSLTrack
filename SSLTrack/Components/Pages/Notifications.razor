@@ -1,7 +1,73 @@
 ﻿@page "/notifications"
+@inject MailService MailService
+@inject ISnackbar Snackbar
+@inject IConfiguration Configuration
 
-<h3>Notifications</h3>
+<MudText Typo="Typo.h5" GutterBottom="true">Notifications</MudText>
+<MudCard>
+    <MudCardContent>
+        <MudTooltip Text="This configuration has to be done on server appsettings.json">
+            <MudGrid>
+                <MudItem xs="6"><MudText><strong>Mail from:</strong></MudText></MudItem>
+                <MudItem xs="6"><MudText>@mailProperties.MailFrom</MudText></MudItem>
+
+                <MudItem xs="6"><MudText><strong>Mail to:</strong></MudText></MudItem>
+                <MudItem xs="6"><MudText>@mailProperties.MailTo</MudText></MudItem>
+
+                <MudItem xs="6"><MudText><strong>Mail Server:</strong></MudText></MudItem>
+                <MudItem xs="6"><MudText>@mailProperties.SmtpHost</MudText></MudItem>
+
+                <MudItem xs="6"><MudText><strong>Mail Port:</strong></MudText></MudItem>
+                <MudItem xs="6"><MudText>@mailProperties.Port</MudText></MudItem>
+
+                <MudItem xs="6"><MudText><strong>Use SSL:</strong></MudText></MudItem>
+                <MudItem xs="6"><MudText>@mailProperties.EnableSsl</MudText></MudItem>
+
+                <MudItem xs="6"><MudText><strong>Username:</strong></MudText></MudItem>
+                <MudItem xs="6"><MudText>@mailProperties.Username</MudText></MudItem>
+            </MudGrid>
+        </MudTooltip>
+    </MudCardContent>
+</MudCard>
+
+<MudDivider />
+
+<MudCard>
+    <MudCardContent>
+        <MudButton OnClick="@SendTestNotification" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.MailOutline" Color="Color.Info" Style="width: 200px; height: 60px;">
+            Send Test Notification
+        </MudButton>
+    </MudCardContent>
+</MudCard>
 
 @code {
+    private string NotificationMessage { get; set; } = string.Empty;
+    private MailProperties mailProperties;
 
+    protected override async Task OnInitializedAsync()
+    {
+        mailProperties = Configuration.GetSection("MailProperties").Get<MailProperties>();
+    }
+
+    private void SendTestNotification()
+    {
+        try
+        {
+            MailService.Subject = "Notification test";
+            MailService.Body = "This is a test email from SSLTrack.";
+            MailService.SendMail();
+            AddSnackbar("Test email sent successfully!", Severity.Success);
+        }
+        catch (Exception)
+        {
+            AddSnackbar("Error sending email, check server logs!", Severity.Error);
+        }
+    }
+
+    void AddSnackbar(string message, Severity severity)
+    {
+        Snackbar.Clear();
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        Snackbar.Add(message, severity);
+    }
 }

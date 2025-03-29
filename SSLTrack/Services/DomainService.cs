@@ -126,7 +126,7 @@ public class DomainService
                 _mailService.Subject = $"Certificate for domain {domain.DomainName.ToUpper()} has expired!";
                 _mailService.Body = $"Certificate for domain {domain.DomainName.ToUpper()} on port {domain.Port} expired on {domain.ExpiryDate}. Immediate action required!";
             }
-            else if (domain.ExpiryDate < now.AddDays(_configurations.DaysToExpiration)) // Domain close to expiration
+            else if (domain.ExpiryDate < now.AddDays(_configurations.DaysToExpiration))
             {
                 _mailService.Subject = $"Certificate for domain {domain.DomainName.ToUpper()} is close to expiration date!";
                 _mailService.Body = $"Certificate for domain {domain.DomainName.ToUpper()} on port {domain.Port} will expire on {domain.ExpiryDate}. Please renew it soon.";
