@@ -4,14 +4,14 @@
 
 <MudCard Class="mt-4">
     <MudCardContent>
-        <MudText>
+        <MudLink Href="/api/swagger" Target="_blank" Color="Color.Primary">
             Api Version: @version
-        </MudText>
+        </MudLink>
     </MudCardContent>
 </MudCard>
 
 @code {
-    private String? version;
+    private string? version;
 
     protected override void OnInitialized()
     {
