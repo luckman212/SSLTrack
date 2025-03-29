@@ -7,6 +7,6 @@ public class RootController : ControllerBase
     [HttpGet("health")]
     public ActionResult<Health> Health()
     {
-        return Ok();
+        return Ok("healthy");
     }
 }
