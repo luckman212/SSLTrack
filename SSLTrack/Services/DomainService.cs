@@ -116,12 +116,27 @@ public class DomainService
         var domains = await _repository.GetAll();
         foreach (var domain in domains)
         {
-            if (domain.ExpiryDate < DateTime.Now.AddDays(_configurations.DaysToExpiration) && _configurations.AlertsEnabled)
+            if (!_configurations.AlertsEnabled)
+                continue;
+
+            var now = DateTime.Now;
+
+            if (domain.ExpiryDate < now)
+            {
+                _mailService.Subject = $"Certificate for domain {domain.DomainName.ToUpper()} has expired!";
+                _mailService.Body = $"Certificate for domain {domain.DomainName.ToUpper()} on port {domain.Port} expired on {domain.ExpiryDate}. Immediate action required!";
+            }
+            else if (domain.ExpiryDate < now.AddDays(_configurations.DaysToExpiration)) // Domain close to expiration
             {
                 _mailService.Subject = $"Certificate for domain {domain.DomainName.ToUpper()} is close to expiration date!";
-                _mailService.Body = $"Certificate for domain {domain.DomainName.ToUpper()} on port {domain.Port} will expire on {domain.ExpiryDate}";
-                _mailService.SendMail();
+                _mailService.Body = $"Certificate for domain {domain.DomainName.ToUpper()} on port {domain.Port} will expire on {domain.ExpiryDate}. Please renew it soon.";
             }
+            else
+            {
+                continue;
+            }
+
+            _mailService.SendMail();
         }
     }
 }
