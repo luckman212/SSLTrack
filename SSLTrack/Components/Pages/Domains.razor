@@ -33,7 +33,7 @@
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Days">
-                        <MudChip Color="@ChipColor(CalcExpiration(context.ExpiryDate))">
+                        <MudChip T="string" Color="@ChipColor(CalcExpiration(context.ExpiryDate))">
                             <div style="text-align:center; min-width:50px; max-width: 50px"> @CalcExpiration(context.ExpiryDate)</div>
                         </MudChip>
                     </MudTd>

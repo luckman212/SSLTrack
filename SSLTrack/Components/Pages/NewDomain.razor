@@ -33,7 +33,7 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
 
     private bool _processing = false;
     private bool _exists = false;

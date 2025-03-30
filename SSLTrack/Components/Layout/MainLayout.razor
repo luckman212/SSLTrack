@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 
-<MudThemingProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" @rendermode="InteractiveServer" />
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" @rendermode="InteractiveServer" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
