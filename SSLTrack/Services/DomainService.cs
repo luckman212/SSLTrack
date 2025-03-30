@@ -26,8 +26,26 @@ public class DomainService
         return await _repository.Search(r => r.DomainName == domainName);
     }
 
-    public async Task<Domain> AddDomain(string domainName, int port)
+    public async Task<Domain> AddDomain(string domainName, int port, string? issuer = null, DateTime? expirationDate = null)
     {
+        if (issuer is not null)
+        {
+            var domain = new Domain
+            {
+                DomainName = domainName,
+                Port = port,
+                CertCN = domainName,
+                Issuer = issuer,
+                ExpiryDate = expirationDate ?? DateTime.Today,
+                LastChecked = expirationDate ?? DateTime.Today,
+                Agent = 99
+            };
+            var result = await _repository.Add(domain);
+            if (result == 1)
+            {
+                return await _repository.GetOne();
+            }
+        }
         var certificate = await _certificateDownloader.GetCertificateAsync(domainName, port);
         if (certificate is not null)
         {
@@ -91,6 +109,9 @@ public class DomainService
         var domains = await _repository.GetAll();
         foreach (var domain in domains)
         {
+            if (domain.Agent == 99)
+                continue;
+
             var certificate = await _certificateDownloader.GetCertificateAsync(domain.DomainName, domain.Port);
             if (certificate is not null)
             {

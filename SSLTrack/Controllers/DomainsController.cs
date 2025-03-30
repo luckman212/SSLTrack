@@ -54,9 +54,9 @@ public class DomainsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Domain>> PostDomain(string domain, int port)
+    public async Task<ActionResult<Domain>> PostDomain(string domain, int port, string? issuer = null, DateTime? expirationDate = null)
     {
-        var result = await _domainService.AddDomain(domain, port);
+        var result = await _domainService.AddDomain(domain, port, issuer, expirationDate);
         if (result is not null)
         {
             return Ok(result);
