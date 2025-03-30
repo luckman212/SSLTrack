@@ -42,7 +42,11 @@
                     <MudTd DataLabel="CertCN">@context.CertCN</MudTd>
                     <MudTd DataLabel="Issuer">@context.Issuer</MudTd>
                     <MudTd DataLabel="ExpiryDate">@context.ExpiryDate</MudTd>
-                    <MudTd DataLabel="LastChecked">@context.LastChecked</MudTd>
+                    <MudTd DataLabel="LastChecked">
+                        <MudText Style="font-size: 0.875rem;" Color="@(context.LastChecked < DateTime.Now.AddDays(-2) ? Color.Error : Color.Default)">
+                            @context.LastChecked
+                        </MudText>
+                    </MudTd>
                     <MudTd DataLabel="Silenced">
                         <MudToggleIconButton Toggled="context.Silenced"
                                              Icon="@Icons.Material.Filled.AlarmOn"
