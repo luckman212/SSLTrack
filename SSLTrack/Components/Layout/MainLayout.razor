@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject ThemeService ThemeService
+@inject IJSRuntime JSRuntime
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" @rendermode="InteractiveServer" />
 <MudPopoverProvider />
@@ -35,6 +37,12 @@
     private MudTheme _theme = new();
     private bool _isDarkMode;
 
+    protected override void OnInitialized()
+    {
+        var httpContext = new HttpContextAccessor().HttpContext;
+        _isDarkMode = ThemeService.IsDarkMode(httpContext);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -52,6 +60,7 @@
     {
         _isDarkMode = value;
         await localStorage.SetItemAsync("isDarkMode", value);
+	await JSRuntime.InvokeVoidAsync("setDarkModeCookie", value);
     }
 
     private void DrawerToggle()
